@@ -53,6 +53,8 @@ defmodule TSL2561 do
   def to_lux({0 = _adc_0, _adc_1}), do: 0
 
   def to_lux({adc_0, adc_1}) do
+    # NOTE: Gain が 1x で使う場合は 2**4 倍する
+    #              16x で使う場合は不要
     adc_0 = adc_0 <<< 4
     adc_1 = adc_1 <<< 4
 
