@@ -56,7 +56,7 @@ defmodule TSL2561 do
     adc_0 = adc_0 <<< 4
     adc_1 = adc_1 <<< 4
 
-    ratio = (adc_1 / adc_0) |> IO.inspect()
+    ratio = adc_1 / adc_0
 
     cond do
       ratio > 0 and ratio <= 0.52 -> 0.0315 * adc_0 - 0.0593 * adc_0 * ratio ** 1.4
