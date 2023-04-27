@@ -88,6 +88,8 @@ config :mdns_lite,
     }
   ]
 
+config :sensor_hub, :weather_tracker_url, "http://192.168.0.59:4000/api/weather-conditions"
+
 # Import target specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 # Uncomment to use target specific configurations
