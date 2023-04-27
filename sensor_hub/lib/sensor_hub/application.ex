@@ -32,9 +32,9 @@ defmodule SensorHub.Application do
 
   def children(_target) do
     [
-      # Children for all targets except host
-      # Starts a worker by calling: SensorHub.Worker.start_link(arg)
-      # {SensorHub.Worker, arg},
+      {SGP30, []},
+      {BMP280, [bus_name: "i2c-1", bus_address: 0x76, name: BMP280]},
+      {Tsl2561, %{i2c_bus_name: "i2c-1", address: 0x29}}
     ]
   end
 
