@@ -43,7 +43,6 @@ defmodule Tsl2561 do
         %{i2c: i2c, address: address, config: config} = state
       ) do
     last_reading = Comm.read(i2c, address, config)
-    Logger.debug("last_reading: #{last_reading}")
     updated_with_reading = %{state | last_reading: last_reading}
     {:noreply, updated_with_reading}
   end
