@@ -15,8 +15,9 @@ defmodule Tsl2561.Comm do
   end
 
   def read(bus, address, config) do
-    read_adc(bus, address)
-    |> to_lux(config)
+    data = read_adc(bus, address)
+    {part_no, _rev_no} = read_id(bus, address)
+    to_lux(data, part_no, config)
   end
 
   def power_up(bus, address) do
@@ -59,9 +60,9 @@ defmodule Tsl2561.Comm do
     {part_no, rev_no}
   end
 
-  defp to_lux({0 = _adc_0, _adc_1}, _config), do: 0
+  defp to_lux({0 = _adc_0, _adc_1}, _part_no, _config), do: 0
 
-  defp to_lux({adc_0, adc_1}, config) do
+  defp to_lux({adc_0, adc_1}, part_no, config) do
     # NOTE: Gain が 1x で使う場合は 2**4 倍する
     #              16x で使う場合は不要
     {adc_0, adc_1} =
@@ -72,11 +73,27 @@ defmodule Tsl2561.Comm do
 
     ratio = adc_1 / adc_0
 
+    to_lux(adc_0, adc_1, ratio, part_no)
+  end
+
+  defp to_lux(adc_0, adc_1, ratio, part_no) when part_no in [0b0000, 0b0001] do
+    # CS package
     cond do
       ratio > 0 and ratio <= 0.52 -> 0.0315 * adc_0 - 0.0593 * adc_0 * ratio ** 1.4
       ratio > 0.52 and ratio <= 0.65 -> 0.0229 * adc_0 - 0.0291 * adc_1
       ratio > 0.65 and ratio <= 0.80 -> 0.0157 * adc_0 - 0.0180 * adc_1
       ratio > 0.80 and ratio <= 1.30 -> 0.00338 * adc_0 - 0.00260 * adc_1
+      ratio > 1.30 -> 0
+    end
+  end
+
+  defp to_lux(adc_0, adc_1, ratio, part_no) when part_no in [0b0100, 0b0101] do
+    # T, FN, CL package
+    cond do
+      ratio > 0 and ratio <= 0.50 -> 0.0304 * adc_0 - 0.062 * adc_0 * ratio ** 1.4
+      ratio > 0.50 and ratio <= 0.61 -> 0.0224 * adc_0 - 0.031 * adc_1
+      ratio > 0.61 and ratio <= 0.80 -> 0.0128 * adc_0 - 0.0153 * adc_1
+      ratio > 0.80 and ratio <= 1.30 -> 0.00146 * adc_0 - 0.00112 * adc_1
       ratio > 1.30 -> 0
     end
   end
