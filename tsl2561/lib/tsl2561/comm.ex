@@ -2,6 +2,9 @@ defmodule Tsl2561.Comm do
   alias Circuits.I2C
   alias Tsl2561.Config
 
+  @cs_package_numbers [0b0000, 0b0001]
+  @t_fn_cl_package_numbers [0b0100, 0b0101]
+
   def open(bus_name) do
     {:ok, bus} = I2C.open(bus_name)
     bus
@@ -76,8 +79,7 @@ defmodule Tsl2561.Comm do
     to_lux(adc_0, adc_1, ratio, part_no)
   end
 
-  defp to_lux(adc_0, adc_1, ratio, part_no) when part_no in [0b0000, 0b0001] do
-    # CS package
+  defp to_lux(adc_0, adc_1, ratio, part_no) when part_no in @cs_package_numbers do
     cond do
       ratio > 0 and ratio <= 0.52 -> 0.0315 * adc_0 - 0.0593 * adc_0 * ratio ** 1.4
       ratio > 0.52 and ratio <= 0.65 -> 0.0229 * adc_0 - 0.0291 * adc_1
@@ -87,8 +89,7 @@ defmodule Tsl2561.Comm do
     end
   end
 
-  defp to_lux(adc_0, adc_1, ratio, part_no) when part_no in [0b0100, 0b0101] do
-    # T, FN, CL package
+  defp to_lux(adc_0, adc_1, ratio, part_no) when part_no in @t_fn_cl_package_numbers do
     cond do
       ratio > 0 and ratio <= 0.50 -> 0.0304 * adc_0 - 0.062 * adc_0 * ratio ** 1.4
       ratio > 0.50 and ratio <= 0.61 -> 0.0224 * adc_0 - 0.031 * adc_1
